@@ -1,160 +1,323 @@
-*{box-sizing:border-box;font-family:system-ui,Arial}
-body{margin:0;background:#eef2f6;display:flex;justify-content:center}
-
-.app-container{
-width:100%;
-max-width:420px;
-min-height:100vh;
-background:#f5f6fa;
+/* ================= GLOBAL ================= */
+* {
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
 }
 
-#loginWrapper{
-min-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-padding:16px;
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #e0e7ff, #f8fafc);
+  display: flex;
+  justify-content: center;
+  color: #1f2937;
 }
 
-#loginBox{
-width:100%;
-max-width:360px;
-background:#fff;
-padding:22px;
-border-radius:14px;
-box-shadow:0 10px 30px rgba(0,0,0,.12);
+/* ================= APP CONTAINER ================= */
+.app-container {
+  width: 100%;
+  max-width: 440px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f9fafb, #eef2ff);
 }
 
-#loginBox h2{text-align:center}
-#loginBox label{font-size:13px;margin-top:12px;display:block}
-#loginBox input{
-width:100%;
-padding:11px;
-margin-top:6px;
-border-radius:8px;
-border:1px solid #ccc;
+/* Desktop card look */
+@media (min-width: 900px) {
+  .app-container {
+    margin: 24px 0;
+    border-radius: 22px;
+    box-shadow: 0 22px 55px rgba(0, 0, 0, 0.18);
+  }
 }
 
-#loginBox button{
-width:100%;
-margin-top:18px;
-padding:12px;
-background:#007bff;
-color:#fff;
-border:none;
-border-radius:10px;
-font-size:16px;
+/* ================= LOGIN ================= */
+#loginWrapper {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
 }
 
-.header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:14px;
+#loginBox {
+  width: 100%;
+  max-width: 360px;
+  background: linear-gradient(180deg, #ffffff, #f1f5ff);
+  padding: 26px;
+  border-radius: 22px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.2);
 }
 
-.header button{
-background:#dc3545;
-border:none;
-color:#fff;
-padding:6px 10px;
-border-radius:6px;
-font-size:12px;
+#loginBox h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #1e40af;
 }
 
-.dashboard{
-display:flex;
-gap:8px;
-padding:0 12px;
+#loginBox label {
+  font-size: 13px;
+  margin-top: 12px;
+  display: block;
+  color: #475569;
 }
 
-.card{
-flex:1;
-background:#fff;
-border-radius:12px;
-padding:10px 6px;
-text-align:center;
+#loginBox input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  border-radius: 12px;
+  border: 1px solid #c7d2fe;
+  background: #f8fafc;
 }
 
-.card h4{font-size:12px;margin:0;color:#777}
-.card p{margin-top:4px;font-size:15px;font-weight:bold}
-
-.entry-box{
-background:#fff;
-margin:12px;
-padding:12px;
-border-radius:14px;
+#loginBox button {
+  width: 100%;
+  margin-top: 22px;
+  padding: 14px;
+  font-size: 16px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
 }
 
-.row{display:flex;gap:6px;margin-bottom:8px}
-
-.compact input,
-.compact select{
-flex:1;
-padding:9px;
-font-size:13px;
-border-radius:8px;
-border:1px solid #ccc;
+#loginMsg {
+  margin-top: 10px;
+  text-align: center;
+  color: #dc2626;
+  font-size: 13px;
 }
 
-.notes-row input{flex:1}
-
-.add-btn{
-width:52px;
-background:#28a745;
-color:#fff;
-font-size:24px;
-border:none;
-border-radius:10px;
+/* ================= HEADER ================= */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px;
 }
 
-.actions{
-display:flex;
-gap:8px;
-padding:0 12px;
+.header h2 {
+  margin: 0;
+  font-size: 19px;
+  color: #1e3a8a;
 }
 
-.actions button{
-flex:1;
-padding:10px;
-font-size:14px;
-background:#007bff;
-border:none;
-border-radius:12px;
-color:#fff;
+.header button {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: none;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-size: 12px;
 }
 
-.table-container{
-margin:12px;
-overflow-x:auto;
+/* ================= DASHBOARD CARDS ================= */
+.dashboard {
+  display: flex;
+  gap: 12px;
+  padding: 0 16px;
+  margin-bottom: 6px;
 }
 
-table{
-width:100%;
-border-collapse:collapse;
-background:#fff;
-border-radius:12px;
-overflow:hidden;
+.card {
+  flex: 1;
+  background: linear-gradient(180deg, #ffffff, #eef2ff);
+  border-radius: 18px;
+  padding: 14px 6px;
+  text-align: center;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
 }
 
-th{
-background:#f1f3f6;
-font-size:12px;
+.card h4 {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
 }
 
-th,td{
-border-bottom:1px solid #eee;
-padding:8px;
-font-size:12px;
-text-align:center;
+.card p {
+  margin-top: 8px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #1e40af;
 }
 
-td button{
-padding:4px 6px;
-border-radius:6px;
-font-size:11px;
-border:none;
+/* ================= BORROW / LEND ================= */
+.borrow-box {
+  margin: 14px 18px;
+  background: linear-gradient(135deg, #ecfeff, #e0f2fe);
+  border-radius: 16px;
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.07);
 }
 
-td button:first-child{background:#ffc107}
-td button:last-child{background:#dc3545;color:#fff}
+/* ================= ENTRY FORM ================= */
+.entry-box {
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  margin: 16px;
+  padding: 16px;
+  border-radius: 22px;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.1);
+}
+
+.entry-box h4 {
+  margin: 0 0 10px;
+  color: #1e40af;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.row input,
+.row select {
+  flex: 1;
+  padding: 13px;
+  font-size: 14px;
+  border-radius: 14px;
+  border: 1px solid #c7d2fe;
+  background: #f9fafb;
+}
+
+/* Notes + Add */
+.notes-row {
+  align-items: stretch;
+}
+
+.notes-row input {
+  flex: 1;
+}
+
+.add-btn {
+  width: 60px;
+  font-size: 30px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  border: none;
+  border-radius: 16px;
+  color: #fff;
+}
+
+/* ================= ACTION BUTTONS ================= */
+.actions {
+  display: flex;
+  gap: 12px;
+  padding: 0 16px;
+}
+
+.actions button {
+  flex: 1;
+  padding: 14px;
+  font-size: 15px;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  border: none;
+  border-radius: 18px;
+  color: #fff;
+}
+
+/* ================= TABLE ================= */
+.table-container {
+  margin: 16px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+th {
+  background: linear-gradient(180deg, #e0e7ff, #c7d2fe);
+  font-size: 12px;
+  color: #1e3a8a;
+}
+
+th,
+td {
+  padding: 12px;
+  font-size: 12px;
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+td {
+  color: #334155;
+}
+
+/* Edit / Delete */
+td button {
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  border: none;
+}
+
+td button:first-child {
+  background: linear-gradient(135deg, #fde68a, #facc15);
+  color: #78350f;
+}
+
+td button:last-child {
+  background: linear-gradient(135deg, #f87171, #dc2626);
+  color: #fff;
+}
+
+/* ================= CHART CANVAS ================= */
+canvas {
+  width: 100% !important;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff, #f1f5ff);
+  box-shadow: inset 0 0 0 1px #e5e7eb;
+}
+
+
+/* ================= PRINT / PDF ================= */
+@media print {
+
+  body {
+    background: #fff !important;
+  }
+
+  .app-container {
+    max-width: 100%;
+    box-shadow: none !important;
+    background: #fff !important;
+  }
+
+  /* Hide buttons */
+  button,
+  .actions {
+    display: none !important;
+  }
+
+  /* Better spacing for PDF */
+  .entry-box,
+  .dashboard,
+  .borrow-box,
+  .table-container {
+    page-break-inside: avoid;
+  }
+
+  canvas {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  table {
+    font-size: 11px;
+  }
+
+  th {
+    background: #eee !important;
+    color: #000 !important;
+  }
+}
