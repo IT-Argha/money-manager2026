@@ -1,0 +1,160 @@
+*{box-sizing:border-box;font-family:system-ui,Arial}
+body{margin:0;background:#eef2f6;display:flex;justify-content:center}
+
+.app-container{
+width:100%;
+max-width:420px;
+min-height:100vh;
+background:#f5f6fa;
+}
+
+#loginWrapper{
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:16px;
+}
+
+#loginBox{
+width:100%;
+max-width:360px;
+background:#fff;
+padding:22px;
+border-radius:14px;
+box-shadow:0 10px 30px rgba(0,0,0,.12);
+}
+
+#loginBox h2{text-align:center}
+#loginBox label{font-size:13px;margin-top:12px;display:block}
+#loginBox input{
+width:100%;
+padding:11px;
+margin-top:6px;
+border-radius:8px;
+border:1px solid #ccc;
+}
+
+#loginBox button{
+width:100%;
+margin-top:18px;
+padding:12px;
+background:#007bff;
+color:#fff;
+border:none;
+border-radius:10px;
+font-size:16px;
+}
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:14px;
+}
+
+.header button{
+background:#dc3545;
+border:none;
+color:#fff;
+padding:6px 10px;
+border-radius:6px;
+font-size:12px;
+}
+
+.dashboard{
+display:flex;
+gap:8px;
+padding:0 12px;
+}
+
+.card{
+flex:1;
+background:#fff;
+border-radius:12px;
+padding:10px 6px;
+text-align:center;
+}
+
+.card h4{font-size:12px;margin:0;color:#777}
+.card p{margin-top:4px;font-size:15px;font-weight:bold}
+
+.entry-box{
+background:#fff;
+margin:12px;
+padding:12px;
+border-radius:14px;
+}
+
+.row{display:flex;gap:6px;margin-bottom:8px}
+
+.compact input,
+.compact select{
+flex:1;
+padding:9px;
+font-size:13px;
+border-radius:8px;
+border:1px solid #ccc;
+}
+
+.notes-row input{flex:1}
+
+.add-btn{
+width:52px;
+background:#28a745;
+color:#fff;
+font-size:24px;
+border:none;
+border-radius:10px;
+}
+
+.actions{
+display:flex;
+gap:8px;
+padding:0 12px;
+}
+
+.actions button{
+flex:1;
+padding:10px;
+font-size:14px;
+background:#007bff;
+border:none;
+border-radius:12px;
+color:#fff;
+}
+
+.table-container{
+margin:12px;
+overflow-x:auto;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:#fff;
+border-radius:12px;
+overflow:hidden;
+}
+
+th{
+background:#f1f3f6;
+font-size:12px;
+}
+
+th,td{
+border-bottom:1px solid #eee;
+padding:8px;
+font-size:12px;
+text-align:center;
+}
+
+td button{
+padding:4px 6px;
+border-radius:6px;
+font-size:11px;
+border:none;
+}
+
+td button:first-child{background:#ffc107}
+td button:last-child{background:#dc3545;color:#fff}

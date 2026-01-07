@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - Money Manager</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="loginWrapper">
+  <div id="loginBox">
+    <h2>💰 Money Manager</h2>
+
+    <label>Username</label>
+    <input id="loginUser" placeholder="Enter username">
+
+    <label>Password</label>
+    <input id="loginPass" type="password" placeholder="Enter password">
+
+    <button id="loginBtn">Login</button>
+    <p id="loginMsg"></p>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDPmg4PcpK5kceWFodPU-7gzzQJ0AWaf5A",
+  authDomain: "money-manager2026.firebaseapp.com",
+  projectId: "money-manager2026",
+  storageBucket: "money-manager2026.firebasestorage.app",
+  messagingSenderId: "375955583976",
+  appId: "1:375955583976:web:fa53cacc6d9f89057f6a5d"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+loginBtn.onclick = async () => {
+  const u = loginUser.value.trim();
+  const p = loginPass.value;
+
+  if(!u || !p){
+    loginMsg.innerText = "Enter username & password";
+    return;
+  }
+
+  const doc = await db.collection("users").doc(u).get();
+  if(!doc.exists || doc.data().password !== p){
+    loginMsg.innerText = "❌ Invalid login";
+    return;
+  }
+
+  sessionStorage.setItem("user", u);
+  location.href = "index.html";
+};
+</script>
+
+</body>
+</html>

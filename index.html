@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Money Manager</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-container">
+
+  <div class="header">
+    <h2>💰 Money Manager</h2>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <div class="dashboard">
+    <div class="card"><h4>Today</h4><p id="todayExpense">₹0</p></div>
+    <div class="card"><h4>Yesterday</h4><p id="yesterdayExpense">₹0</p></div>
+    <div class="card"><h4>Balance</h4><p id="balance">₹0</p></div>
+  </div>
+
+  <div class="entry-box">
+    <div class="row compact">
+      <input type="date" id="date">
+      <select id="type"><option>Personal</option><option>Official</option></select>
+      <select id="transaction"><option>Expense</option><option>Income</option></select>
+      <select id="payment"><option>Cash</option><option>Online</option></select>
+    </div>
+
+    <div class="row compact">
+      <select id="category">
+        <option>Food 🍛</option>
+        <option>Travel 🚆</option>
+        <option>Rent 🏠</option>
+        <option>Grocery 🛒</option>
+        <option>Salary 💼</option>
+        <option>Freelance 💻</option>
+      </select>
+      <input type="number" id="amount" placeholder="₹">
+    </div>
+
+    <div class="row compact notes-row">
+      <input id="notes" placeholder="Notes">
+      <button id="addBtn" class="add-btn">＋</button>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button id="downloadCSV">⬇ CSV</button>
+    <button onclick="location.href='monthly.html'">📅 Monthly</button>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th><th>Type</th><th>Txn</th><th>Category</th>
+          <th>Mode</th><th>Amount</th><th>Notes</th><th>Other</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
