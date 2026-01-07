@@ -1,323 +1,176 @@
-/* ================= GLOBAL ================= */
-* {
-  box-sizing: border-box;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+// 🔥 Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyDPmg4PcpK5kceWFodPU-7gzzQJ0AWaf5A",
+  authDomain: "money-manager2026.firebaseapp.com",
+  projectId: "money-manager2026",
+  storageBucket: "money-manager2026.firebasestorage.app",
+  messagingSenderId: "375955583976",
+  appId: "1:375955583976:web:fa53cacc6d9f89057f6a5d"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// 🔐 Login check
+const user = sessionStorage.getItem("user");
+if (!user) location.href = "login.html";
+
+// 📅 Default date
+date.valueAsDate = new Date();
+let editId = null;
+
+/* ================= CATEGORY MAP ================= */
+const categoryMap = {
+  Expense: ["Food 🍛","Grocery 🛒","Travel 🚆","Fuel ⛽","Rent 🏠","Electricity 💡","Medical 🏥","Shopping 🛍️"],
+  Income: ["Salary 💼","Freelance 💻","Business 🏢","Bonus 🎉","Interest 💰"],
+  Borrow: ["Friend 🤝","Family 👪","Loan 🏦","EMI 📄"],
+  Lend: ["Friend 🤝","Family 👪"]
+};
+
+function loadCategories(txn) {
+  category.innerHTML = "";
+
+  categoryMap[txn].forEach(c => {
+    const opt = document.createElement("option");
+    opt.textContent = c;
+    category.appendChild(opt);
+  });
+
+  const other = document.createElement("option");
+  other.value = "Others";
+  other.textContent = "Others (Custom)";
+  category.appendChild(other);
+
+  customCategory.style.display = "none";
 }
 
-body {
-  margin: 0;
-  background: linear-gradient(180deg, #e0e7ff, #f8fafc);
-  display: flex;
-  justify-content: center;
-  color: #1f2937;
-}
+transaction.onchange = () => loadCategories(transaction.value);
+loadCategories(transaction.value);
 
-/* ================= APP CONTAINER ================= */
-.app-container {
-  width: 100%;
-  max-width: 440px;
-  min-height: 100vh;
-  background: linear-gradient(180deg, #f9fafb, #eef2ff);
-}
+category.onchange = () => {
+  customCategory.style.display = category.value === "Others" ? "block" : "none";
+};
 
-/* Desktop card look */
-@media (min-width: 900px) {
-  .app-container {
-    margin: 24px 0;
-    border-radius: 22px;
-    box-shadow: 0 22px 55px rgba(0, 0, 0, 0.18);
-  }
-}
+/* ================= ADD / UPDATE ================= */
+addBtn.onclick = async () => {
+  const cat = category.value === "Others" ? customCategory.value : category.value;
+  if (!amount.value || !cat) return alert("Fill required fields");
 
-/* ================= LOGIN ================= */
-#loginWrapper {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 16px;
-}
+  const data = {
+    user,
+    date: date.value,
+    type: type.value,
+    payment: payment.value,
+    transaction: transaction.value,
+    category: cat,
+    amount: Number(amount.value),
+    notes: notes.value || ""
+  };
 
-#loginBox {
-  width: 100%;
-  max-width: 360px;
-  background: linear-gradient(180deg, #ffffff, #f1f5ff);
-  padding: 26px;
-  border-radius: 22px;
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.2);
-}
-
-#loginBox h2 {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #1e40af;
-}
-
-#loginBox label {
-  font-size: 13px;
-  margin-top: 12px;
-  display: block;
-  color: #475569;
-}
-
-#loginBox input {
-  width: 100%;
-  padding: 12px;
-  margin-top: 6px;
-  border-radius: 12px;
-  border: 1px solid #c7d2fe;
-  background: #f8fafc;
-}
-
-#loginBox button {
-  width: 100%;
-  margin-top: 22px;
-  padding: 14px;
-  font-size: 16px;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  color: #fff;
-  border: none;
-  border-radius: 14px;
-}
-
-#loginMsg {
-  margin-top: 10px;
-  text-align: center;
-  color: #dc2626;
-  font-size: 13px;
-}
-
-/* ================= HEADER ================= */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 18px;
-}
-
-.header h2 {
-  margin: 0;
-  font-size: 19px;
-  color: #1e3a8a;
-}
-
-.header button {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  border: none;
-  color: #fff;
-  padding: 8px 14px;
-  border-radius: 12px;
-  font-size: 12px;
-}
-
-/* ================= DASHBOARD CARDS ================= */
-.dashboard {
-  display: flex;
-  gap: 12px;
-  padding: 0 16px;
-  margin-bottom: 6px;
-}
-
-.card {
-  flex: 1;
-  background: linear-gradient(180deg, #ffffff, #eef2ff);
-  border-radius: 18px;
-  padding: 14px 6px;
-  text-align: center;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
-}
-
-.card h4 {
-  margin: 0;
-  font-size: 12px;
-  color: #64748b;
-}
-
-.card p {
-  margin-top: 8px;
-  font-size: 17px;
-  font-weight: 800;
-  color: #1e40af;
-}
-
-/* ================= BORROW / LEND ================= */
-.borrow-box {
-  margin: 14px 18px;
-  background: linear-gradient(135deg, #ecfeff, #e0f2fe);
-  border-radius: 16px;
-  padding: 14px 18px;
-  display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-  font-weight: 600;
-  color: #0f172a;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.07);
-}
-
-/* ================= ENTRY FORM ================= */
-.entry-box {
-  background: linear-gradient(180deg, #ffffff, #f8fafc);
-  margin: 16px;
-  padding: 16px;
-  border-radius: 22px;
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.1);
-}
-
-.entry-box h4 {
-  margin: 0 0 10px;
-  color: #1e40af;
-}
-
-.row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-}
-
-.row input,
-.row select {
-  flex: 1;
-  padding: 13px;
-  font-size: 14px;
-  border-radius: 14px;
-  border: 1px solid #c7d2fe;
-  background: #f9fafb;
-}
-
-/* Notes + Add */
-.notes-row {
-  align-items: stretch;
-}
-
-.notes-row input {
-  flex: 1;
-}
-
-.add-btn {
-  width: 60px;
-  font-size: 30px;
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  border: none;
-  border-radius: 16px;
-  color: #fff;
-}
-
-/* ================= ACTION BUTTONS ================= */
-.actions {
-  display: flex;
-  gap: 12px;
-  padding: 0 16px;
-}
-
-.actions button {
-  flex: 1;
-  padding: 14px;
-  font-size: 15px;
-  background: linear-gradient(135deg, #2563eb, #1e40af);
-  border: none;
-  border-radius: 18px;
-  color: #fff;
-}
-
-/* ================= TABLE ================= */
-.table-container {
-  margin: 16px;
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #ffffff;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
-}
-
-th {
-  background: linear-gradient(180deg, #e0e7ff, #c7d2fe);
-  font-size: 12px;
-  color: #1e3a8a;
-}
-
-th,
-td {
-  padding: 12px;
-  font-size: 12px;
-  text-align: center;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-td {
-  color: #334155;
-}
-
-/* Edit / Delete */
-td button {
-  padding: 6px 10px;
-  border-radius: 12px;
-  font-size: 11px;
-  border: none;
-}
-
-td button:first-child {
-  background: linear-gradient(135deg, #fde68a, #facc15);
-  color: #78350f;
-}
-
-td button:last-child {
-  background: linear-gradient(135deg, #f87171, #dc2626);
-  color: #fff;
-}
-
-/* ================= CHART CANVAS ================= */
-canvas {
-  width: 100% !important;
-  border-radius: 14px;
-  background: linear-gradient(180deg, #ffffff, #f1f5ff);
-  box-shadow: inset 0 0 0 1px #e5e7eb;
-}
-
-
-/* ================= PRINT / PDF ================= */
-@media print {
-
-  body {
-    background: #fff !important;
+  if (editId) {
+    await db.collection("transactions").doc(editId).update(data);
+    editId = null;
+  } else {
+    await db.collection("transactions").add(data);
   }
 
-  .app-container {
-    max-width: 100%;
-    box-shadow: none !important;
-    background: #fff !important;
-  }
+  amount.value = "";
+  notes.value = "";
+  customCategory.value = "";
+};
 
-  /* Hide buttons */
-  button,
-  .actions {
-    display: none !important;
-  }
-
-  /* Better spacing for PDF */
-  .entry-box,
-  .dashboard,
-  .borrow-box,
-  .table-container {
-    page-break-inside: avoid;
-  }
-
-  canvas {
-    max-width: 100% !important;
-    height: auto !important;
-  }
-
-  table {
-    font-size: 11px;
-  }
-
-  th {
-    background: #eee !important;
-    color: #000 !important;
-  }
+function logout() {
+  sessionStorage.clear();
+  location.href = "login.html";
 }
+
+/* ================= FETCH & CALCULATE ================= */
+db.collection("transactions")
+  .where("user", "==", user)
+  .onSnapshot(snapshot => {
+
+    let rows = "";
+    let income = 0, expense = 0, borrow = 0, lend = 0;
+
+    snapshot.forEach(doc => {
+      const x = doc.data();
+
+      if (x.transaction === "Income") income += x.amount;
+      if (x.transaction === "Expense") expense += x.amount;
+      if (x.transaction === "Borrow") borrow += x.amount;
+      if (x.transaction === "Lend") lend += x.amount;
+
+      rows += `
+      <tr>
+        <td>${x.date}</td>
+        <td>${x.type}</td>
+        <td>${x.payment}</td>
+        <td>${x.transaction}</td>
+        <td>${x.category}</td>
+        <td>₹${x.amount}</td>
+        <td>${x.notes || ""}</td>
+        <td>
+          <button onclick="editEntry('${doc.id}')">✏</button>
+          <button onclick="deleteEntry('${doc.id}')">🗑</button>
+        </td>
+      </tr>`;
+    });
+
+    tableBody.innerHTML = rows;
+
+    // ✅ SAFE DOM UPDATE
+    document.getElementById("balance").innerText =
+      "₹" + (income + lend - expense - borrow);
+
+    document.getElementById("totalBorrow").innerText = borrow;
+    document.getElementById("totalLend").innerText = lend;
+});
+
+/* ================= EDIT / DELETE ================= */
+window.editEntry = async id => {
+  const d = await db.collection("transactions").doc(id).get();
+  const x = d.data();
+
+  date.value = x.date;
+  type.value = x.type;
+  payment.value = x.payment;
+  transaction.value = x.transaction;
+  loadCategories(x.transaction);
+  category.value = x.category;
+  amount.value = x.amount;
+  notes.value = x.notes;
+  editId = id;
+};
+
+window.deleteEntry = async id => {
+  if (confirm("Delete entry?")) {
+    await db.collection("transactions").doc(id).delete();
+  }
+};
+
+/* ================= CSV EXPORT ================= */
+downloadCSV.onclick = async () => {
+  const snap = await db.collection("transactions")
+    .where("user", "==", user)
+    .get();
+
+  if (snap.empty) return alert("No data");
+
+  let csv = "Date,Type,Payment,Transaction,Category,Amount,Notes\n";
+
+  snap.forEach(doc => {
+    const x = doc.data();
+    csv += `"${x.date}","${x.type}","${x.payment}","${x.transaction}","${x.category}","${x.amount}","${x.notes || ""}"\n`;
+  });
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "money-manager.csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
