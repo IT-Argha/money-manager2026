@@ -13,10 +13,10 @@
     <h2>💰 Money Manager</h2>
 
     <label>Username</label>
-    <input id="loginUser" placeholder="Enter username">
+    <input id="loginUser" placeholder="Username">
 
     <label>Password</label>
-    <input id="loginPass" type="password" placeholder="Enter password">
+    <input id="loginPass" type="password" placeholder="Password">
 
     <button id="loginBtn">Login</button>
     <p id="loginMsg"></p>
@@ -43,14 +43,9 @@ loginBtn.onclick = async () => {
   const u = loginUser.value.trim();
   const p = loginPass.value;
 
-  if(!u || !p){
-    loginMsg.innerText = "Enter username & password";
-    return;
-  }
-
   const doc = await db.collection("users").doc(u).get();
-  if(!doc.exists || doc.data().password !== p){
-    loginMsg.innerText = "❌ Invalid login";
+  if (!doc.exists || doc.data().password !== p) {
+    loginMsg.innerText = "❌ Invalid username or password";
     return;
   }
 
