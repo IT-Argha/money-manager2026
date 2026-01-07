@@ -1,4 +1,4 @@
-// 🔥 Firebase Config
+// 🔥 Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDPmg4PcpK5kceWFodPU-7gzzQJ0AWaf5A",
   authDomain: "money-manager2026.firebaseapp.com",
@@ -7,7 +7,6 @@ const firebaseConfig = {
   messagingSenderId: "375955583976",
   appId: "1:375955583976:web:fa53cacc6d9f89057f6a5d"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
@@ -15,32 +14,66 @@ const db = firebase.firestore();
 const user = sessionStorage.getItem("user");
 if (!user) location.href = "login.html";
 
-// 📅 Default date
 date.valueAsDate = new Date();
 let editId = null;
 
-/* ================= CATEGORY MAP ================= */
+// ================= EXPANDED CATEGORY MAP =================
 const categoryMap = {
-  Expense: ["Food 🍛","Grocery 🛒","Travel 🚆","Fuel ⛽","Rent 🏠","Electricity 💡","Medical 🏥","Shopping 🛍️"],
-  Income: ["Salary 💼","Freelance 💻","Business 🏢","Bonus 🎉","Interest 💰"],
-  Borrow: ["Friend 🤝","Family 👪","Loan 🏦","EMI 📄"],
-  Lend: ["Friend 🤝","Family 👪"]
+  Expense: [
+    "Food 🍛", 
+    "Grocery 🛒", 
+    "Travel 🚆", 
+    "Fuel ⛽", 
+    "Rent 🏠",
+    "Utilities 💡",
+    "Healthcare 🏥",
+    "Entertainment 🎬",
+    "Shopping 🛍️",
+    "Education 📚",
+    "Subscription 📱",
+    "Transport 🚗",
+    "Dining Out 🍽️",
+    "Gifts 🎁",
+    "Home Maintenance 🔨"
+  ],
+  Income: [
+    "Salary 💼", 
+    "Bonus 🎉", 
+    "Interest 💰",
+    "Freelance 💻",
+    "Investment 📈",
+    "Rental Income 🏘️",
+    "Refund 💸",
+    "Dividends 📊",
+    "Commission 🤝",
+    "Side Business 🏪"
+  ],
+  Borrow: [
+    "Friend 🤝", 
+    "Loan 🏦",
+    "Family 👨‍👩‍👧‍👦",
+    "Credit Card 💳",
+    "Emergency 🚨"
+  ],
+  Lend: [
+    "Friend 🤝",
+    "Family 👨‍👩‍👧‍👦",
+    "Colleague 👔",
+    "Business Partner 🤝"
+  ]
 };
 
-function loadCategories(txn) {
+function loadCategories(type) {
   category.innerHTML = "";
-
-  categoryMap[txn].forEach(c => {
-    const opt = document.createElement("option");
-    opt.textContent = c;
-    category.appendChild(opt);
+  categoryMap[type].forEach(c => {
+    const o = document.createElement("option");
+    o.textContent = c;
+    category.appendChild(o);
   });
-
   const other = document.createElement("option");
   other.value = "Others";
   other.textContent = "Others (Custom)";
   category.appendChild(other);
-
   customCategory.style.display = "none";
 }
 
@@ -51,7 +84,7 @@ category.onchange = () => {
   customCategory.style.display = category.value === "Others" ? "block" : "none";
 };
 
-/* ================= ADD / UPDATE ================= */
+// ================= ADD / UPDATE =================
 addBtn.onclick = async () => {
   const cat = category.value === "Others" ? customCategory.value : category.value;
   if (!amount.value || !cat) return alert("Fill required fields");
@@ -64,7 +97,8 @@ addBtn.onclick = async () => {
     transaction: transaction.value,
     category: cat,
     amount: Number(amount.value),
-    notes: notes.value || ""
+    notes: notes.value || "",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
   };
 
   if (editId) {
@@ -79,26 +113,44 @@ addBtn.onclick = async () => {
   customCategory.value = "";
 };
 
-function logout() {
-  sessionStorage.clear();
-  location.href = "login.html";
-}
-
-/* ================= FETCH & CALCULATE ================= */
+// ================= REALTIME FETCH - NEWEST FIRST =================
 db.collection("transactions")
   .where("user", "==", user)
   .onSnapshot(snapshot => {
 
+    let docs = [];
+    snapshot.forEach(doc => docs.push({ id: doc.id, ...doc.data() }));
+
+    // 🔑 SORT: Newest first (by createdAt or date)
+    docs.sort((a, b) => {
+      // First try to sort by createdAt (server timestamp)
+      if (a.createdAt && b.createdAt) {
+        return b.createdAt.seconds - a.createdAt.seconds; // Newest first
+      }
+      // Fallback: sort by date (newest first)
+      return b.date.localeCompare(a.date);
+    });
+
     let rows = "";
     let income = 0, expense = 0, borrow = 0, lend = 0;
+    let todayExpense = 0, yesterdayExpense = 0;
 
-    snapshot.forEach(doc => {
-      const x = doc.data();
+    const today = new Date().toISOString().slice(0, 10);
+    const yd = new Date();
+    yd.setDate(yd.getDate() - 1);
+    const yesterday = yd.toISOString().slice(0, 10);
+
+    docs.forEach(x => {
 
       if (x.transaction === "Income") income += x.amount;
       if (x.transaction === "Expense") expense += x.amount;
       if (x.transaction === "Borrow") borrow += x.amount;
       if (x.transaction === "Lend") lend += x.amount;
+
+      if (x.transaction === "Expense") {
+        if (x.date === today) todayExpense += x.amount;
+        if (x.date === yesterday) yesterdayExpense += x.amount;
+      }
 
       rows += `
       <tr>
@@ -110,67 +162,76 @@ db.collection("transactions")
         <td>₹${x.amount}</td>
         <td>${x.notes || ""}</td>
         <td>
-          <button onclick="editEntry('${doc.id}')">✏</button>
-          <button onclick="deleteEntry('${doc.id}')">🗑</button>
+          <button onclick="editEntry('${x.id}')">✏</button>
+          <button onclick="deleteEntry('${x.id}')">🗑</button>
         </td>
       </tr>`;
     });
 
     tableBody.innerHTML = rows;
-
-    // ✅ SAFE DOM UPDATE
-    document.getElementById("balance").innerText =
-      "₹" + (income + lend - expense - borrow);
-
+    
+    // Update dashboard elements
+    document.getElementById("todayExpense").innerText = "₹" + todayExpense;
+    document.getElementById("yesterdayExpense").innerText = "₹" + yesterdayExpense;
+    document.getElementById("balance").innerText = "₹" + (income + lend - expense - borrow);
     document.getElementById("totalBorrow").innerText = borrow;
     document.getElementById("totalLend").innerText = lend;
-});
+  });
 
-/* ================= EDIT / DELETE ================= */
+// ================= EDIT =================
 window.editEntry = async id => {
   const d = await db.collection("transactions").doc(id).get();
   const x = d.data();
-
   date.value = x.date;
   type.value = x.type;
   payment.value = x.payment;
   transaction.value = x.transaction;
   loadCategories(x.transaction);
-  category.value = x.category;
+  
+  // Check if category exists in our map or is custom
+  const catList = categoryMap[x.transaction] || [];
+  if (catList.includes(x.category)) {
+    category.value = x.category;
+    customCategory.style.display = "none";
+  } else {
+    category.value = "Others";
+    customCategory.value = x.category;
+    customCategory.style.display = "block";
+  }
+  
   amount.value = x.amount;
   notes.value = x.notes;
   editId = id;
 };
 
+// ================= DELETE =================
 window.deleteEntry = async id => {
   if (confirm("Delete entry?")) {
     await db.collection("transactions").doc(id).delete();
   }
 };
 
-/* ================= CSV EXPORT ================= */
+// ================= CSV =================
 downloadCSV.onclick = async () => {
   const snap = await db.collection("transactions")
     .where("user", "==", user)
     .get();
 
-  if (snap.empty) return alert("No data");
-
   let csv = "Date,Type,Payment,Transaction,Category,Amount,Notes\n";
-
-  snap.forEach(doc => {
-    const x = doc.data();
+  snap.forEach(d => {
+    const x = d.data();
     csv += `"${x.date}","${x.type}","${x.payment}","${x.transaction}","${x.category}","${x.amount}","${x.notes || ""}"\n`;
   });
 
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-
   const a = document.createElement("a");
-  a.href = url;
+  a.href = URL.createObjectURL(blob);
   a.download = "money-manager.csv";
-  document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
 };
+
+// ================= LOGOUT =================
+function logout() {
+  sessionStorage.clear();
+  location.href = "login.html";
+}
