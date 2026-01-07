@@ -18,6 +18,7 @@ date.valueAsDate = new Date();
 let editId = null;
 
 // ================= EXPANDED CATEGORY MAP =================
+
 const categoryMap = {
   Expense: [
     "Food 🍛", 
@@ -26,40 +27,140 @@ const categoryMap = {
     "Fuel ⛽", 
     "Rent 🏠",
     "Utilities 💡",
+    "Electricity ⚡",
+    "Water 💧",
+    "Internet 🌐",
+    "Mobile 📱",
     "Healthcare 🏥",
+    "Medicines 💊",
+    "Doctor 👨‍⚕️",
+    "Hospital 🏨",
     "Entertainment 🎬",
+    "Movies 🎥",
+    "Streaming 📺",
+    "Games 🎮",
+    "Concerts 🎤",
     "Shopping 🛍️",
+    "Clothing 👕",
+    "Electronics 📱",
+    "Furniture 🪑",
+    "Beauty 💄",
     "Education 📚",
+    "Tuition 👩‍🏫",
+    "Books 📖",
+    "Courses 🎓",
     "Subscription 📱",
     "Transport 🚗",
+    "Taxi 🚕",
+    "Bus 🚌",
+    "Train 🚄",
+    "Flight ✈️",
     "Dining Out 🍽️",
+    "Restaurant 🍜",
+    "Cafe ☕",
+    "Fast Food 🍔",
     "Gifts 🎁",
-    "Home Maintenance 🔨"
+    "Birthday 🎂",
+    "Anniversary 💝",
+    "Wedding 💒",
+    "Home Maintenance 🔨",
+    "Repairs 🔧",
+    "Cleaning 🧹",
+    "Gardening 🌿",
+    "Insurance 🛡️",
+    "Car Insurance 🚗",
+    "Health Insurance 🏥",
+    "Life Insurance 👨‍👩‍👧‍👦",
+    "Fitness 🏋️",
+    "Gym 💪",
+    "Sports 🏸",
+    "Yoga 🧘",
+    "Pets 🐕",
+    "Pet Food 🦴",
+    "Vet 🐾",
+    "Grooming ✂️",
+    "Charity 🤲",
+    "Donation 💝",
+    "Tips 💁",
+    "Taxes 💰",
+    "Income Tax 📋",
+    "Property Tax 🏠",
+    "GST 🧾"
   ],
   Income: [
     "Salary 💼", 
     "Bonus 🎉", 
     "Interest 💰",
+    "Bank Interest 🏦",
+    "FD Interest 📈",
     "Freelance 💻",
+    "Consulting 👨‍💼",
+    "Design 🎨",
+    "Development 💻",
     "Investment 📈",
+    "Stocks 📊",
+    "Mutual Funds 📈",
+    "Crypto ₿",
     "Rental Income 🏘️",
+    "House Rent 🏠",
+    "Shop Rent 🏪",
     "Refund 💸",
+    "Tax Refund 📋",
+    "Product Return 📦",
     "Dividends 📊",
     "Commission 🤝",
-    "Side Business 🏪"
+    "Sales Commission 📈",
+    "Referral 🤝",
+    "Side Business 🏪",
+    "Online Store 🛒",
+    "Tuition 👩‍🏫",
+    "Pension 👴",
+    "Allowance 💵",
+    "Scholarship 🎓",
+    "Gift Money 🎁",
+    "Inheritance 👨‍👩‍👧‍👦",
+    "Lottery 🎰",
+    "Rewards 🏆",
+    "Cashback 💳"
   ],
   Borrow: [
     "Friend 🤝", 
     "Loan 🏦",
+    "Personal Loan 👤",
+    "Home Loan 🏠",
+    "Car Loan 🚗",
     "Family 👨‍👩‍👧‍👦",
+    "Parents 👨‍👩‍👧",
+    "Siblings 👨‍👧",
     "Credit Card 💳",
-    "Emergency 🚨"
+    "Cash Advance 💰",
+    "EMI 📅",
+    "Emergency 🚨",
+    "Medical Emergency 🏥",
+    "Urgent Repair 🔧",
+    "Business Capital 💼",
+    "Education Loan 📚",
+    "Payday Loan 💵",
+    "Gold Loan 👑",
+    "Online Loan 🌐"
   ],
   Lend: [
     "Friend 🤝",
     "Family 👨‍👩‍👧‍👦",
+    "Parents 👨‍👩‍👧",
+    "Children 👶",
     "Colleague 👔",
-    "Business Partner 🤝"
+    "Business Partner 🤝",
+    "Investment 📈",
+    "Peer-to-Peer 🤲",
+    "Student 👨‍🎓",
+    "Relative 👨‍👩‍👧‍👦",
+    "Neighbor 🏘️",
+    "Emergency Help 🆘",
+    "Short Term 🔄",
+    "Long Term 📅",
+    "Interest Free 🆓",
+    "With Interest 📈"
   ]
 };
 
@@ -68,6 +169,7 @@ function loadCategories(type) {
   categoryMap[type].forEach(c => {
     const o = document.createElement("option");
     o.textContent = c;
+    o.value = c;
     category.appendChild(o);
   });
   const other = document.createElement("option");
@@ -75,6 +177,7 @@ function loadCategories(type) {
   other.textContent = "Others (Custom)";
   category.appendChild(other);
   customCategory.style.display = "none";
+  customCategory.value = "";
 }
 
 transaction.onchange = () => loadCategories(transaction.value);
@@ -82,8 +185,10 @@ loadCategories(transaction.value);
 
 category.onchange = () => {
   customCategory.style.display = category.value === "Others" ? "block" : "none";
+  if (category.value !== "Others") {
+    customCategory.value = "";
+  }
 };
-
 // ================= ADD / UPDATE =================
 addBtn.onclick = async () => {
   const cat = category.value === "Others" ? customCategory.value : category.value;
@@ -235,3 +340,4 @@ function logout() {
   sessionStorage.clear();
   location.href = "login.html";
 }
+
