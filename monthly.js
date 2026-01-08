@@ -113,8 +113,15 @@ async function loadMonth() {
       }
       if (x.transaction === "Borrow") borrow += amount;
       if (x.transaction === "Lend") lend += amount;
-      if (x.type === "Personal") p += amount;
-      if (x.type === "Official") o += amount;
+// Personal / Official (ONLY Expense + YES)
+if (
+  x.transaction === "Expense" &&
+  x.countForDaily === true
+) {
+  if (x.type === "Personal") p += amount;
+  if (x.type === "Official") o += amount;
+}
+
       
       // Build table row
       const txnClass = `monthly-table-${x.transaction.toLowerCase()}`;
@@ -349,3 +356,4 @@ window.addEventListener('resize', function() {
 
 // ========== INITIALIZE ==========
 document.addEventListener('DOMContentLoaded', init);
+
