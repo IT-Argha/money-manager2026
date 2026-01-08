@@ -3,25 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Monthly Summary</title>
+<title>Monthly Report - Money Manager</title>
 <link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
 
+<body class="monthly">
 <div class="app-container">
 
   <!-- HEADER -->
   <div class="header">
-    <button onclick="history.back()">⬅ Back</button>
-   <h2>📅 Summary</h2>
-   <div>
-    <button onclick="downloadPDF()">⬇ PDF</button>
+    <h2>📅 Monthly Report</h2>
+    <div class="header-actions">
+      <button onclick="downloadPDF()">⬇ PDF</button>
+      <button onclick="history.back()">⬅ Back</button>
+    </div>
   </div>
- </div>
 
   <!-- MONTH PICKER -->
   <div class="entry-box">
-    <label>Select Month</label>
+    <label for="monthPicker">Select Month</label>
     <input type="month" id="monthPicker">
   </div>
 
@@ -32,27 +33,47 @@
     <div class="card"><h4>Balance</h4><p id="mBalance">₹0</p></div>
   </div>
 
-  <!-- PAYMENT SUMMARY -->
   <div class="dashboard">
     <div class="card"><h4>Online</h4><p id="mOnline">₹0</p></div>
-    <div class="card"><h4>Offline</h4><p id="mOffline">₹0</p></div>
+    <div class="card"><h4>Cash</h4><p id="mOffline">₹0</p></div>
     <div class="card"><h4>Avg / Day</h4><p id="mAvg">₹0</p></div>
   </div>
 
+  <!-- BORROW/LEND -->
   <div class="borrow-box">
-  <span>Borrow : ₹<b id="mBorrow">0</b></span>
-  <span>Lend : ₹<b id="mLend">0</b></span>
-</div>
-
-  <!-- CHARTS -->
-  <div class="entry-box">
-    <h4>📊 Weekly Expense</h4>
-    <canvas id="weekChart" height="180"></canvas>
+    <span>Borrow : ₹<b id="mBorrow">0</b></span>
+    <span>Lend : ₹<b id="mLend">0</b></span>
   </div>
 
+  <!-- INSIGHTS -->
   <div class="entry-box">
-    <h4>💳 Online vs Offline</h4>
-    <canvas id="payChart" height="180"></canvas>
+    <h4>📌 Monthly Insights</h4>
+    <p><b>Highest Day:</b> <span id="maxDay">-</span></p>
+    <p><b>Top Category:</b> <span id="topCategory">-</span></p>
+    <p><b>Spending Level:</b> <span id="spendLevel">-</span></p>
+    <p><b>Personal:</b> ₹<span id="pAmt">0</span> | <b>Official:</b> ₹<span id="oAmt">0</span></p>
+
+    <div class="progress-wrap">
+      <div class="progress-bar">
+        <div id="expenseBar"></div>
+      </div>
+      <small>Expense vs Income: <span id="expenseRatio">0%</span></small>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="entry-box chart-box">
+    <h4>📊 Weekly Expense (YES only)</h4>
+    <div class="chart-container">
+      <canvas id="weekChart"></canvas>
+    </div>
+  </div>
+
+  <div class="entry-box chart-box">
+    <h4>💳 Online vs Cash (YES only)</h4>
+    <div class="chart-container">
+      <canvas id="payChart"></canvas>
+    </div>
   </div>
 
   <!-- TABLE -->
@@ -60,14 +81,12 @@
     <table>
       <thead>
         <tr>
-          <th>Date</th>
-          <th>Txn</th>
-          <th>Pay</th>
-          <th>Category</th>
-          <th>Amount</th>
+          <th>Date</th><th>Txn</th><th>Pay</th><th>Category</th><th>Amount</th>
         </tr>
       </thead>
-      <tbody id="monthlyTable"></tbody>
+      <tbody id="monthlyTable">
+        <tr><td colspan="5" class="loading">Loading monthly data...</td></tr>
+      </tbody>
     </table>
   </div>
 
