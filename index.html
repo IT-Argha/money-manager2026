@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,95 +10,67 @@
 
 <div class="app-container">
 
-  <!-- HEADER -->
-  <div class="header">
-    <h2>💰 Money Manager</h2>
-    <button onclick="logout()">Logout</button>
+<div class="header">
+  <h2>💰 Money Manager</h2>
+  <button onclick="logout()">Logout</button>
+</div>
+
+<div class="dashboard">
+  <div class="card"><h4>Today</h4><p id="todayExpense">₹0</p></div>
+  <div class="card"><h4>Yesterday</h4><p id="yesterdayExpense">₹0</p></div>
+  <div class="card"><h4>Balance</h4><p id="balance">₹0</p></div>
+</div>
+
+<div class="borrow-box">
+  <span>Borrow : ₹<b id="totalBorrow">0</b></span>
+  <span>Lend : ₹<b id="totalLend">0</b></span>
+</div>
+
+<div class="entry-box">
+
+  <div class="row">
+    <input type="date" id="date">
+    <select id="type"><option>Personal</option><option>Official</option></select>
+    <select id="payment"><option>Cash</option><option>Online</option></select>
   </div>
 
-  <!-- DASHBOARD -->
-  <div class="dashboard">
-    <div class="card">
-      <h4>Today</h4>
-      <p id="todayExpense">₹0</p>
-    </div>
-    <div class="card">
-      <h4>Yesterday</h4>
-      <p id="yesterdayExpense">₹0</p>
-    </div>
-    <div class="card">
-      <h4>Balance</h4>
-      <p id="balance">₹0</p>
-    </div>
+  <div class="row">
+    <select id="transaction">
+      <option>Expense</option><option>Income</option>
+      <option>Borrow</option><option>Lend</option>
+    </select>
+    <select id="category"></select>
   </div>
 
-  <!-- BORROW / LEND (FIXED) -->
-  <div class="borrow-box">
-    <span>Borrow : ₹<b id="totalBorrow">0</b></span>
-    <span>Lend : ₹<b id="totalLend">0</b></span>
+  <div class="row">
+    <input id="customCategory" placeholder="Custom category" style="display:none">
+    <input type="number" id="amount" placeholder="₹">
   </div>
 
-  <!-- ENTRY FORM -->
-  <div class="entry-box">
-
-    <div class="row">
-      <input type="date" id="date">
-      <select id="type">
-        <option>Personal</option>
-        <option>Official</option>
-      </select>
-      <select id="payment">
-        <option>Offline</option>
-        <option>Online</option>
-      </select>
-    </div>
-
-    <div class="row">
-      <select id="transaction">
-        <option>Expense</option>
-        <option>Income</option>
-        <option>Borrow</option>
-        <option>Lend</option>
-      </select>
-      <select id="category"></select>
-    </div>
-
-    <div class="row">
-      <input id="customCategory" placeholder="Custom category" style="display:none">
-      <input type="number" id="amount" placeholder="₹">
-    </div>
-
-    <div class="row notes-row">
-      <input id="notes" placeholder="Notes">
-      <button id="addBtn" class="add-btn">＋</button>
-    </div>
-
+  <div class="row notes-row">
+    <input id="notes" placeholder="Notes">
+    <button id="countToggle" class="toggle-btn active">YES</button>
+    <button id="addBtn" class="add-btn">＋</button>
   </div>
 
-  <!-- ACTIONS -->
-  <div class="actions">
-    <button id="downloadCSV">⬇ CSV</button>
-    <button onclick="location.href='monthly.html'">📅 Monthly</button>
-  </div>
+</div>
 
-  <!-- TABLE -->
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Type</th>
-          <th>Pay</th>
-          <th>Txn</th>
-          <th>Category</th>
-          <th>Amount</th>
-          <th>Notes</th>
-          <th>Other</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-  </div>
+<div class="actions">
+  <button id="downloadCSV">⬇ CSV</button>
+  <button onclick="location.href='monthly.html'">📅 Monthly</button>
+</div>
+
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>Date</th><th>Type</th><th>Pay</th><th>Txn</th>
+<th>Category</th><th>Amount</th><th>Notes</th><th>Other</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+</div>
 
 </div>
 
