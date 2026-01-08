@@ -556,7 +556,6 @@ tbody tr:hover {
 }
 
 
-
 td button {
   padding: 8px 14px;
   border-radius: 10px;
@@ -615,11 +614,12 @@ canvas {
     background: #fff !important;
   }
 
-  .app-container {
-    max-width: 100%;
-    box-shadow: none !important;
-    background: #fff !important;
-  }
+ .app-container {
+  width: 100%;
+  max-width: 440px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f9fafb, #eef2ff);
+}
 
   /* Hide buttons */
   button,
@@ -882,4 +882,3 @@ html {
 .row > *:nth-child(1) { animation-delay: 0.1s; }
 .row > *:nth-child(2) { animation-delay: 0.2s; }
 .row > *:nth-child(3) { animation-delay: 0.3s; }
-
