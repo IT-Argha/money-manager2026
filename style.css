@@ -371,6 +371,26 @@ body {
   padding-right: 40px;
 }
 
+/* Specific styling for transaction and category row */
+.row:nth-child(2) {
+  gap: 10px;
+}
+
+.row:nth-child(2) #transaction {
+  flex: 1;
+  min-width: 120px;
+}
+
+.row:nth-child(2) #category {
+  flex: 2;
+  min-width: 150px;
+}
+
+/* Adjust custom category and amount row */
+.row:nth-child(3) {
+  margin-top: 14px;
+}
+
 /* Notes + Add */
 .notes-row {
   align-items: stretch;
@@ -882,3 +902,11 @@ html {
 .row > *:nth-child(1) { animation-delay: 0.1s; }
 .row > *:nth-child(2) { animation-delay: 0.2s; }
 .row > *:nth-child(3) { animation-delay: 0.3s; }
+
+/* Responsive adjustments for very small screens */
+@media (max-width: 380px) {
+  .row:nth-child(2) #transaction,
+  .row:nth-child(2) #category {
+    min-width: 110px;
+  }
+}
