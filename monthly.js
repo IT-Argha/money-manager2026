@@ -193,9 +193,9 @@ function calculateInsights(cat, day, income, expense, daily) {
 
   const avg = daily / 30;
   spendLevel.textContent =
-    avg > 1000 ? "Very High 🔴" :
-    avg > 500 ? "High 🟠" :
-    avg > 300 ? "Moderate 🟡" : "Low 🟢";
+    avg > 1000 ? ">1000|Very High 🔴" :
+    avg > 500 ? ">500|High 🟠" :
+    avg > 300 ? ">300|Moderate 🟡" : "<300|Low 🟢";
 
   const ratio = income > 0 ? (expense / income) * 100 : 100;
   expenseBar.style.width = `${Math.min(ratio, 100)}%`;
@@ -269,11 +269,12 @@ function drawCharts(weeks, on, off) {
     }
   });
 }
+
 // ========== DOWNLOAD PDF ==========
 function downloadPDF() {
   window.print();
 }
+
 // ========== EVENTS ==========
 monthPicker.addEventListener("change", loadMonth);
 document.addEventListener("DOMContentLoaded", init);
-
