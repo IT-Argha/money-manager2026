@@ -269,7 +269,11 @@ function drawCharts(weeks, on, off) {
     }
   });
 }
-
+// ========== DOWNLOAD PDF ==========
+function downloadPDF() {
+  window.print();
+}
 // ========== EVENTS ==========
 monthPicker.addEventListener("change", loadMonth);
 document.addEventListener("DOMContentLoaded", init);
+
