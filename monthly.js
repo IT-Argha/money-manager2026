@@ -8,23 +8,18 @@ const firebaseConfig = {
   appId: "1:375955583976:web:fa53cacc6d9f89057f6a5d"
 };
 
-// Initialize Firebase
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ========== AUTH CHECK ==========
+// ========== AUTH ==========
 const user = sessionStorage.getItem("user");
-if (!user) {
-  location.href = "login.html";
-}
+if (!user) location.href = "login.html";
 
-// ========== GLOBAL VARIABLES ==========
+// ========== GLOBAL ==========
 let weekChartInstance = null;
 let payChartInstance = null;
 
-// ========== DOM ELEMENTS ==========
+// ========== DOM ==========
 const monthPicker = document.getElementById("monthPicker");
 const mIncome = document.getElementById("mIncome");
 const mExpense = document.getElementById("mExpense");
@@ -45,264 +40,228 @@ const monthlyTable = document.getElementById("monthlyTable");
 const weekChart = document.getElementById("weekChart");
 const payChart = document.getElementById("payChart");
 
-// ========== INITIALIZATION ==========
+// ========== BAR VALUE PLUGIN ==========
+Chart.register({
+  id: "barValueTop",
+  afterDatasetsDraw(chart) {
+    const { ctx } = chart;
+    ctx.save();
+    chart.data.datasets.forEach(ds => {
+      chart.getDatasetMeta(0).data.forEach((bar, i) => {
+        const v = ds.data[i];
+        if (!v) return;
+        ctx.font = "bold 12px Arial";
+        ctx.fillStyle = "#111";
+        ctx.textAlign = "center";
+        ctx.fillText(`₹${v.toLocaleString("en-IN")}`, bar.x, bar.y - 6);
+      });
+    });
+    ctx.restore();
+  }
+});
+
+// ========== INIT ==========
 function init() {
-  // Set current month as default
-  const now = new Date();
-  const currentMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
-  monthPicker.value = currentMonth;
-  
-  // Load data
+  const d = new Date();
+  monthPicker.value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
   loadMonth();
 }
 
-// ========== LOAD MONTHLY DATA ==========
+// ========== LOAD MONTH ==========
 async function loadMonth() {
-  if (!user) return;
-  
   const selectedMonth = monthPicker.value;
   if (!selectedMonth) return;
-  
-  // Show loading
-  monthlyTable.innerHTML = '<tr><td colspan="5" class="loading">Loading monthly data...</td></tr>';
-  
-  try {
-    const snapshot = await db.collection("transactions")
-      .where("user", "==", user)
-      .get();
-    
-    if (snapshot.empty) {
-      monthlyTable.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #6b7280;">No transactions found</td></tr>';
-      resetAllValues();
-      return;
-    }
-    
-    // Initialize counters
-    let income = 0, expense = 0, daily = 0;
-    let borrow = 0, lend = 0;
-    let on = 0, off = 0;
-    let p = 0, o = 0;
-    
-    const weeks = [0, 0, 0, 0, 0];
-    const cat = {};
-    const day = {};
-    let rows = "";
-    
-    // Process transactions
-    snapshot.forEach(doc => {
-      const x = doc.data();
-      
-      // Filter by month
-      if (!x.date || !x.date.startsWith(selectedMonth)) return;
-      
-      const amount = Number(x.amount) || 0;
-      const dayNo = parseInt(x.date.split("-")[2]) || 1;
-      const w = Math.min(Math.floor((dayNo - 1) / 7), 4);
-      
-      // Categorize transactions
-      if (x.transaction === "Income") income += amount;
-      if (x.transaction === "Expense") {
-        expense += amount;
-        if (x.countForDaily) {
-          daily += amount;
-          weeks[w] += amount;
-          x.payment === "Online" ? on += amount : off += amount;
-          cat[x.category] = (cat[x.category] || 0) + amount;
-          day[x.date] = (day[x.date] || 0) + amount;
-        }
+
+  monthlyTable.innerHTML = `<tr><td colspan="5">Loading...</td></tr>`;
+
+  let income = 0, expense = 0, daily = 0;
+  let borrow = 0, lend = 0;
+
+  // 🔹 YES ONLY (for cards)
+  let onYes = 0, offYes = 0;
+
+  // 🔹 ALL (for chart)
+  let onAll = 0, offAll = 0;
+
+  let p = 0, o = 0;
+
+  const weeks = [0, 0, 0, 0, 0];
+  const cat = {};
+  const day = {};
+  let rowsArr = [];
+
+  const snap = await db.collection("transactions")
+    .where("user", "==", user)
+    .get();
+
+  snap.forEach(doc => {
+    const x = doc.data();
+    if (!x.date || !x.date.startsWith(selectedMonth)) return;
+
+    const amt = Number(x.amount) || 0;
+    const dayNo = parseInt(x.date.split("-")[2]) || 1;
+    const w = Math.min(Math.floor((dayNo - 1) / 7), 4);
+
+    if (x.transaction === "Income") income += amt;
+
+    if (x.transaction === "Expense") {
+      expense += amt;
+
+      // ALL → chart
+      if (x.payment === "Online") onAll += amt;
+      if (x.payment === "Cash") offAll += amt;
+
+      // YES ONLY → cards + weekly
+      if (x.countForDaily === true) {
+        daily += amt;
+        weeks[w] += amt;
+
+        if (x.payment === "Online") onYes += amt;
+        if (x.payment === "Cash") offYes += amt;
+
+        cat[x.category] = (cat[x.category] || 0) + amt;
+        day[x.date] = (day[x.date] || 0) + amt;
+
+        if (x.type === "Personal") p += amt;
+        if (x.type === "Official") o += amt;
       }
-      if (x.transaction === "Borrow") borrow += amount;
-      if (x.transaction === "Lend") lend += amount;
-// Personal / Official (ONLY Expense + YES)
-if (
-  x.transaction === "Expense" &&
-  x.countForDaily === true
-) {
-  if (x.type === "Personal") p += amount;
-  if (x.type === "Official") o += amount;
-}
-
-      
-      // Build table row
-      const txnClass = `monthly-table-${x.transaction.toLowerCase()}`;
-      rows += `
-        <tr>
-          <td>${x.date}</td>
-          <td><span class="${txnClass}" style="padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;">
-              ${x.transaction}
-            </span>
-          </td>
-          <td>${x.payment}</td>
-          <td>${x.category}</td>
-          <td style="font-weight: 700;">₹${amount.toLocaleString('en-IN')}</td>
-        </tr>`;
-    });
-    
-    // Update table
-    monthlyTable.innerHTML = rows || '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #6b7280;">No transactions found</td></tr>';
-    
-    // Update dashboard
-    updateDashboard(income, expense, borrow, lend, on, off, daily, p, o);
-    
-    // Calculate insights
-    calculateInsights(cat, day, income, expense, daily);
-    
-    // Draw charts
-    drawCharts(weeks, on, off);
-    
-  } catch (error) {
-    console.error("Error loading monthly data:", error);
-    monthlyTable.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #dc2626;">Error loading data</td></tr>';
-  }
-}
-
-// ========== UPDATE DASHBOARD ==========
-function updateDashboard(income, expense, borrow, lend, on, off, daily, p, o) {
-  // Format currency function
-  const format = (amount) => `₹${amount.toLocaleString('en-IN')}`;
-  
-  mIncome.textContent = format(income);
-  mExpense.textContent = format(expense);
-  mBalance.textContent = format(income + lend - expense - borrow);
-  mOnline.textContent = format(on);
-  mOffline.textContent = format(off);
-  mAvg.textContent = format(Math.round(daily / 30));
-  mBorrow.textContent = borrow.toLocaleString('en-IN');
-  mLend.textContent = lend.toLocaleString('en-IN');
-  pAmt.textContent = p.toLocaleString('en-IN');
-  oAmt.textContent = o.toLocaleString('en-IN');
-}
-
-// ========== CALCULATE INSIGHTS ==========
-function calculateInsights(cat, day, income, expense, daily) {
-  // Top category
-  let top = "-";
-  let max = 0;
-  for (let c in cat) {
-    if (cat[c] > max) {
-      max = cat[c];
-      top = c + " (₹" + max.toLocaleString('en-IN') + ")";
     }
+
+    if (x.transaction === "Borrow") borrow += amt;
+    if (x.transaction === "Lend") lend += amt;
+
+rowsArr.push({
+  date: x.date,
+  html: `
+    <tr>
+      <td>${x.date}</td>
+      <td>${x.transaction}</td>
+      <td>${x.payment}</td>
+      <td>${x.category}</td>
+      <td><b>₹${amt.toLocaleString("en-IN")}</b></td>
+    </tr>`
+});
+
+
+  });
+
+  rowsArr.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+monthlyTable.innerHTML = rowsArr.length
+  ? rowsArr.map(r => r.html).join("")
+  : `<tr><td colspan="5">No Data</td></tr>`;
+
+  updateDashboard(income, expense, borrow, lend, onYes, offYes, daily, p, o);
+  calculateInsights(cat, day, income, expense, daily);
+  drawCharts(weeks, onAll, offAll);
+}
+
+// ========== DASHBOARD ==========
+function updateDashboard(i, e, b, l, onYes, offYes, d, p, o) {
+  const f = n => `₹${n.toLocaleString("en-IN")}`;
+  mIncome.textContent = f(i);
+  mExpense.textContent = f(e);
+  mBalance.textContent = f(i + l - e - b);
+
+  // ✅ YES ONLY
+  mOnline.textContent = f(onYes);
+  mOffline.textContent = f(offYes);
+  mAvg.textContent = f(Math.round(d / 30));
+
+  mBorrow.textContent = b;
+  mLend.textContent = l;
+  pAmt.textContent = p;
+  oAmt.textContent = o;
+}
+
+// ========== INSIGHTS ==========
+function calculateInsights(cat, day, income, expense, daily) {
+  let top = "-", max = 0;
+  for (let c in cat) if (cat[c] > max) {
+    max = cat[c];
+    top = `${c} (₹${max.toLocaleString("en-IN")})`;
   }
   topCategory.textContent = top;
-  
-  // Highest day
-  let md = "-";
-  let mv = 0;
-  for (let d in day) {
-    if (day[d] > mv) {
-      mv = day[d];
-      const dateObj = new Date(d);
-      md = dateObj.getDate() + "/" + (dateObj.getMonth() + 1) + " (₹" + mv.toLocaleString('en-IN') + ")";
-    }
+
+  let md = "-", mv = 0;
+  for (let d in day) if (day[d] > mv) {
+    mv = day[d];
+    const dt = new Date(d);
+    md = `${dt.getDate()}/${dt.getMonth() + 1} (₹${mv.toLocaleString("en-IN")})`;
   }
   maxDay.textContent = md;
-  
-  // Spending level
-  const avgDaily = daily / 30;
-  let level = "";
-  if (avgDaily > 2000) {
-    level = "Very High 🔴";
-    spendLevel.style.backgroundColor = "#fee2e2";
-    spendLevel.style.color = "#991b1b";
-  } else if (avgDaily > 1000) {
-    level = "High 🟠";
-    spendLevel.style.backgroundColor = "#fef3c7";
-    spendLevel.style.color = "#92400e";
-  } else if (avgDaily > 300) {
-    level = "Moderate 🟡";
-    spendLevel.style.backgroundColor = "#fef9c3";
-    spendLevel.style.color = "#854d0e";
-  } else {
-    level = "Low 🟢";
-    spendLevel.style.backgroundColor = "#dcfce7";
-    spendLevel.style.color = "#166534";
-  }
-  spendLevel.textContent = level;
-  
-  // Expense ratio
-  const expensePercent = income > 0 ? Math.min((expense / income) * 100, 100) : 100;
-  expenseBar.style.width = expensePercent + "%";
-  expenseRatio.textContent = expensePercent.toFixed(1) + "%";
+
+  const avg = daily / 30;
+  spendLevel.textContent =
+    avg > 1000 ? "Very High 🔴" :
+    avg > 500 ? "High 🟠" :
+    avg > 300 ? "Moderate 🟡" : "Low 🟢";
+
+  const ratio = income > 0 ? (expense / income) * 100 : 100;
+  expenseBar.style.width = `${Math.min(ratio, 100)}%`;
+  expenseRatio.textContent = `${ratio.toFixed(1)}%`;
 }
 
-// ========== DRAW CHARTS ==========
+// ========== CHARTS ==========
 function drawCharts(weeks, on, off) {
-  // Destroy existing charts
   if (weekChartInstance) weekChartInstance.destroy();
   if (payChartInstance) payChartInstance.destroy();
-  
-  // Weekly Chart
-  const weekCtx = weekChart.getContext('2d');
-  weekChartInstance = new Chart(weekCtx, {
-    type: 'bar',
+
+  // WEEKLY BAR (VALUE ON TOP)
+  weekChartInstance = new Chart(weekChart, {
+    type: "bar",
     data: {
-      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5+'],
+      labels: ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5+"],
       datasets: [{
-        label: 'Expense (₹)',
         data: weeks,
-        backgroundColor: '#3b82f6',
-        borderColor: '#1d4ed8',
-        borderWidth: 1,
+        backgroundColor: "#3b82f6",
         borderRadius: 6
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              return '₹' + context.raw.toLocaleString('en-IN');
-            }
-          }
-        }
-      },
+      plugins: { legend: { display: false } },
       scales: {
         y: {
           beginAtZero: true,
-          ticks: {
-            callback: function(value) {
-              return '₹' + value.toLocaleString('en-IN');
-            }
-          }
+          ticks: { callback: v => `₹${v.toLocaleString("en-IN")}` }
         }
       }
-    }
+    },
+    plugins: ["barValueTop"]
   });
-  
-  // Payment Method Chart
-  const payCtx = payChart.getContext('2d');
-  payChartInstance = new Chart(payCtx, {
-    type: 'doughnut',
+
+  // ONLINE vs CASH
+  const total = on + off;
+
+  payChartInstance = new Chart(payChart, {
+    type: "doughnut",
     data: {
-      labels: ['Online', 'Offline'],
+      labels: [
+        `Online:₹${on.toLocaleString("en-IN")}`,
+        `Cash:₹${off.toLocaleString("en-IN")}`
+      ],
       datasets: [{
         data: [on, off],
-        backgroundColor: ['#10b981', '#f59e0b'],
-        borderColor: ['#059669', '#d97706'],
-        borderWidth: 1
+        backgroundColor: ["#10b981", "#f59e0b"]
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      cutout: '60%',
+      cutout: "65%",
       plugins: {
         legend: {
-          position: 'bottom',
-          labels: {
-            padding: 15
-          }
+          position: "bottom",
+          labels: { font: { size: 13, weight: "bold" } }
         },
         tooltip: {
           callbacks: {
-            label: function(context) {
-              const total = on + off;
-              const percent = total > 0 ? ((context.raw / total) * 100).toFixed(1) : 0;
-              return `${context.label}: ₹${context.raw.toLocaleString('en-IN')} (${percent}%)`;
+            label: ctx => {
+              const val = ctx.raw;
+              const p = total ? ((val / total) * 100).toFixed(1) : 0;
+              return `₹${val.toLocaleString("en-IN")} (${p}%)`;
             }
           }
         }
@@ -311,49 +270,6 @@ function drawCharts(weeks, on, off) {
   });
 }
 
-// ========== RESET VALUES ==========
-function resetAllValues() {
-  mIncome.textContent = "₹0";
-  mExpense.textContent = "₹0";
-  mBalance.textContent = "₹0";
-  mOnline.textContent = "₹0";
-  mOffline.textContent = "₹0";
-  mAvg.textContent = "₹0";
-  mBorrow.textContent = "0";
-  mLend.textContent = "0";
-  maxDay.textContent = "-";
-  topCategory.textContent = "-";
-  spendLevel.textContent = "-";
-  spendLevel.style.backgroundColor = "";
-  spendLevel.style.color = "";
-  pAmt.textContent = "0";
-  oAmt.textContent = "0";
-  expenseBar.style.width = "0%";
-  expenseRatio.textContent = "0%";
-  
-  // Clear charts
-  if (weekChartInstance) {
-    weekChartInstance.destroy();
-    weekChartInstance = null;
-  }
-  if (payChartInstance) {
-    payChartInstance.destroy();
-    payChartInstance = null;
-  }
-}
-
-// ========== DOWNLOAD PDF ==========
-function downloadPDF() {
-  window.print();
-}
-
-// ========== EVENT LISTENERS ==========
-monthPicker.addEventListener('change', loadMonth);
-window.addEventListener('resize', function() {
-  if (weekChartInstance) weekChartInstance.resize();
-  if (payChartInstance) payChartInstance.resize();
-});
-
-// ========== INITIALIZE ==========
-document.addEventListener('DOMContentLoaded', init);
-
+// ========== EVENTS ==========
+monthPicker.addEventListener("change", loadMonth);
+document.addEventListener("DOMContentLoaded", init);
